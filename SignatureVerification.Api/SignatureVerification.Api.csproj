@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\signature-detection\src\SignatureDetectionSdk\SignatureDetectionSdk.csproj" />
+    <ProjectReference Include="..\sigver\SigVerSdk\SigVerSdk.csproj" />
   </ItemGroup>
 
 </Project>

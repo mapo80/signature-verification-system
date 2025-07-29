@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FF3A7291-E92
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignatureDetectionSdk", "signature-detection\src\SignatureDetectionSdk\SignatureDetectionSdk.csproj", "{95DB2F65-8544-4E68-9919-FABB2A12AB45}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sigver", "sigver", "{9DEDFE91-F099-7BB1-8045-0B924A524305}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigVerSdk", "sigver\SigVerSdk\SigVerSdk.csproj", "{80E96447-FC2E-4A39-BA40-A3421AF6B400}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +63,18 @@ Global
 		{95DB2F65-8544-4E68-9919-FABB2A12AB45}.Release|x64.Build.0 = Release|Any CPU
 		{95DB2F65-8544-4E68-9919-FABB2A12AB45}.Release|x86.ActiveCfg = Release|Any CPU
 		{95DB2F65-8544-4E68-9919-FABB2A12AB45}.Release|x86.Build.0 = Release|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Debug|x64.Build.0 = Debug|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Debug|x86.Build.0 = Debug|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Release|x64.ActiveCfg = Release|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Release|x64.Build.0 = Release|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Release|x86.ActiveCfg = Release|Any CPU
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,5 +82,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{FF3A7291-E92F-9F2A-C6AF-AF6D1BD2AB0B} = {A26D68CB-D459-A719-B83D-0C8A31457EB1}
 		{95DB2F65-8544-4E68-9919-FABB2A12AB45} = {FF3A7291-E92F-9F2A-C6AF-AF6D1BD2AB0B}
+		{80E96447-FC2E-4A39-BA40-A3421AF6B400} = {9DEDFE91-F099-7BB1-8045-0B924A524305}
 	EndGlobalSection
 EndGlobal

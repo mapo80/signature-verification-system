@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using SkiaSharp;
 using SignatureVerification.Api.Models;
 using SignatureVerification.Api.Services;
@@ -9,11 +10,13 @@ namespace SignatureVerification.Api.Controllers;
 [Route("[controller]")]
 public class SignatureController : ControllerBase
 {
-    private readonly SignatureDetectionService _service;
+    private readonly SignatureDetectionService _detector;
+    private readonly SignatureVerificationService _verifier;
 
-    public SignatureController(SignatureDetectionService service)
+    public SignatureController(SignatureDetectionService detector, SignatureVerificationService verifier)
     {
-        _service = service;
+        _detector = detector;
+        _verifier = verifier;
     }
 
     [HttpPost("detect")]
@@ -31,7 +34,7 @@ public class SignatureController : ControllerBase
 
         try
         {
-            var predictions = _service.Predict(tempFile, model);
+            var predictions = _detector.Predict(tempFile, model);
             using var image = SKBitmap.Decode(tempFile);
             var response = new DetectResponseDto
             {
@@ -72,6 +75,43 @@ public class SignatureController : ControllerBase
         finally
         {
             System.IO.File.Delete(tempFile);
+        }
+    }
+
+    [HttpPost("verify")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<VerifyResponseDto>> Verify(
+        IFormFile reference,
+        IFormFile candidate,
+        [FromQuery] bool detection = false,
+        [FromQuery] float threshold = 0.35f,
+        [FromQuery] DetectionModel model = DetectionModel.Detr,
+        [FromQuery] bool preprocessed = false)
+    {
+        var refFile = Path.GetTempFileName();
+        var candFile = Path.GetTempFileName();
+        await using (var stream = System.IO.File.Create(refFile))
+        {
+            await reference.CopyToAsync(stream);
+        }
+        await using (var stream = System.IO.File.Create(candFile))
+        {
+            await candidate.CopyToAsync(stream);
+        }
+
+        try
+        {
+            var result = _verifier.Verify(refFile, candFile, detection, threshold, model, preprocessed);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
+        finally
+        {
+            System.IO.File.Delete(refFile);
+            System.IO.File.Delete(candFile);
         }
     }
 }
