@@ -1,0 +1,10 @@
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userprefs
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+**/bin/
+**/obj/
