@@ -71,6 +71,17 @@ Run the development server:
 npm run dev
 ```
 
+### Configuring the API base URL
+
+The generated REST client uses the `VITE_API_BASE_URL` environment variable.
+If not set, requests use a relative path, so the API must be hosted on the same
+origin. When deploying the webapp separately, provide the URL before building:
+
+```bash
+VITE_API_BASE_URL="https://myserver.example" npm run build
+```
+
+
 ## Testing
 
 Install dependencies and Playwright browsers:
