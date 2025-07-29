@@ -144,3 +144,11 @@ genuine pairs are accepted.
 The [sigver README](sigver/README.md) reports the same outcome when verifying a
 larger random sample (30 forged and 30 genuine pairs) with an average time of
 about 19 ms for forgeries and 22 ms for genuine signatures.
+
+### Web UI test
+
+The `webapp` folder contains an end-to-end Playwright test that exercises the full detection flow. It uploads a sample image, selects the `yolo` model, waits for the loading spinner and finally verifies the mocked response.
+
+![Detection screenshot](webapp/docs/detect_full.png)
+
+<video src="webapp/docs/detect_demo.mp4" controls></video>
