@@ -8,3 +8,6 @@ obj/
 *.csproj.nuget.g.targets
 **/bin/
 **/obj/
+
+# Ignore built web assets
+SignatureVerification.Api/wwwroot/
