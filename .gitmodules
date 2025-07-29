@@ -1,0 +1,6 @@
+[submodule "sigver"]
+	path = sigver
+	url = https://github.com/mapo80/sigver.git
+[submodule "signature-detection"]
+	path = signature-detection
+	url = https://github.com/mapo80/signature-detection-detr.git
