@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: Signature Verification API
+  version: 1.0.0
+servers:
+  - url: http://localhost:5217
+paths:
+  /signature/detect:
+    post:
+      operationId: detectSignature
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      parameters:
+        - name: includeImages
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: model
+          in: query
+          schema:
+            $ref: '#/components/schemas/DetectionModel'
+          required: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetectResponseDto'
+  /signature/verify:
+    post:
+      operationId: verifySignature
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                reference:
+                  type: string
+                  format: binary
+                candidate:
+                  type: string
+                  format: binary
+      parameters:
+        - name: detection
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: threshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: model
+          in: query
+          schema:
+            $ref: '#/components/schemas/DetectionModel'
+          required: false
+        - name: preprocessed
+          in: query
+          schema:
+            type: boolean
+          required: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponseDto'
+components:
+  schemas:
+    BoundingBoxDto:
+      type: object
+      properties:
+        x1:
+          type: number
+        y1:
+          type: number
+        x2:
+          type: number
+        y2:
+          type: number
+    SignatureDto:
+      type: object
+      properties:
+        confidence:
+          type: number
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBoxDto'
+        imageData:
+          type: string
+          format: byte
+          nullable: true
+    DetectResponseDto:
+      type: object
+      properties:
+        signatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignatureDto'
+    VerifyResponseDto:
+      type: object
+      properties:
+        forged:
+          type: boolean
+        similarity:
+          type: number
+        referenceImage:
+          type: string
+          format: byte
+          nullable: true
+        candidateImage:
+          type: string
+          format: byte
+          nullable: true
+    DetectionModel:
+      type: string
+      enum:
+        - Detr
+        - Yolo

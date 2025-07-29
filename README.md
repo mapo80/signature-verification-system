@@ -2,10 +2,22 @@
 
 This repository contains a minimal ASP.NET Core 9 Web API that exposes endpoints for detecting and verifying handwritten signatures. The API relies on the `SignatureDetectionSdk` and `SigVerSdk` submodules. A small integration test project is provided.
 
+Clone the repository including the submodules so the SDK projects and sample
+datasets are available:
+
+```bash
+git clone --recurse-submodules <repository-url>
+# or, if you already cloned it
+git submodule update --init --recursive
+```
+
 ## Requirements
 * .NET SDK 9.0.303
 * The `conditional_detr_signature.onnx` model (recombined from the split parts) and the `yolov8s.onnx` model contained in `signature-detection`
 * The `signet.onnx` verification model available in `sigver/models`
+* On Ubuntu you also need the native dependencies required by `libOpenCvSharpExtern.so`:
+  `libgtk2.0-0 libgdk-pixbuf2.0-0 libtesseract5 libdc1394-25 libavcodec60 \
+  libavformat60 libswscale7 libsm6 libxext6 libxrender1 libgomp1`
 
 Install the correct .NET SDK locally with the included script and add it to the `PATH`:
 
