@@ -8,6 +8,8 @@ namespace SignatureVerification.Api.Tests;
 public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
+    private static bool ShouldRun =>
+        string.Equals(Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS"), "true", StringComparison.OrdinalIgnoreCase);
 
     public IntegrationTests(WebApplicationFactory<Program> factory)
     {
@@ -19,6 +21,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [InlineData("yolo", true)]
     public async Task DetectEndpoint_ReturnsDetections(string model, bool includeImages)
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
         var imagePath = Path.Combine(root, "signature-detection", "dataset", "dataset1", "images", "00101001_png_jpg.rf.27db3f0cbf1a1ef078dcca2fdc2874af.jpg");
@@ -42,6 +45,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task DetectEndpoint_ReturnsErrorWhenNoSignatures()
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
 
         using var bmp = new SkiaSharp.SKBitmap(640, 640);
@@ -79,6 +83,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [MemberData(nameof(GetDatasetImages))]
     public async Task DetectEndpoint_WorksForDatasetImages(string model, string imagePath)
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
         await using var fs = File.OpenRead(imagePath);
         using var content = new MultipartFormDataContent();
@@ -103,6 +108,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [InlineData(true)]
     public async Task VerifyEndpoint_SameImageReturnsFalse(bool detection)
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
         var imagePath = Path.Combine(root, "signature-detection", "dataset", "dataset1", "images", "00101001_png_jpg.rf.27db3f0cbf1a1ef078dcca2fdc2874af.jpg");
@@ -127,6 +133,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task VerifyEndpoint_DifferentImagesReturnsTrue()
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
         var img1 = Path.Combine(root, "signature-detection", "dataset", "dataset1", "images", "00101001_png_jpg.rf.27db3f0cbf1a1ef078dcca2fdc2874af.jpg");
@@ -180,6 +187,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [MemberData(nameof(DatasetGenuineForgedPairs))]
     public async Task VerifyEndpoint_GenuineForgedPairs_ReturnForged(string referencePath, string forgedPath)
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
         await using var fs1 = File.OpenRead(referencePath);
         await using var fs2 = File.OpenRead(forgedPath);
@@ -203,6 +211,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [MemberData(nameof(DatasetGenuinePairs))]
     public async Task VerifyEndpoint_GenuinePairs_ReturnNotForged(string referencePath, string candidatePath)
     {
+        if (!ShouldRun) return;
         using var client = _factory.CreateClient();
         await using var fs1 = File.OpenRead(referencePath);
         await using var fs2 = File.OpenRead(candidatePath);

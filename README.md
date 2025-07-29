@@ -152,3 +152,9 @@ The `webapp` folder contains an end-to-end Playwright test that exercises the fu
 ![Detection screenshot](webapp/docs/detect_full.png)
 
 <video src="webapp/docs/detect_demo.mp4" controls></video>
+
+The web UI also includes a **Verify** tab where you can compare two signatures. Provide a reference and a candidate image, optionally enable detection, choose the model, adjust the similarity threshold and decide whether to return the preprocessed signatures. The result shows a green check or red cross according to the `forged` field, the similarity value and, when requested, the processed images.
+
+![Verify screenshot](webapp/docs/verify_full.png)
+
+<video src="webapp/docs/verify_demo.mp4" controls></video>
