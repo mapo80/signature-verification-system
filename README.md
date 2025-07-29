@@ -1,10 +1,11 @@
 # Signature Verification System
 
-This repository contains a minimal ASP.NET Core 9 Web API that exposes a signature detection endpoint. The API relies on the `SignatureDetectionSdk` contained in the `signature-detection` submodule. A small integration test project is provided.
+This repository contains a minimal ASP.NET Core 9 Web API that exposes endpoints for detecting and verifying handwritten signatures. The API relies on the `SignatureDetectionSdk` and `SigVerSdk` submodules. A small integration test project is provided.
 
 ## Requirements
 * .NET SDK 9.0.303
 * The `conditional_detr_signature.onnx` model (recombined from the split parts) and the `yolov8s.onnx` model contained in `signature-detection`
+* The `signet.onnx` verification model available in `sigver/models`
 
 Install the correct .NET SDK locally with the included script and add it to the `PATH`:
 
@@ -79,3 +80,55 @@ Each signature object has:
 * `imageData` - PNG bytes of the cropped signature when requested
 
 When running in development a Swagger UI is available at `/swagger`.
+
+## Verification endpoint
+
+The API also exposes a `POST /signature/verify` endpoint that compares two images
+containing signatures. It uses the `SigVerSdk` to compute the similarity between
+the reference signature and the candidate one.
+
+The request accepts two files as form data:
+
+* `reference` – image of the known signature
+* `candidate` – image to compare
+
+Query parameters:
+
+* `detection` – when `true` the service first detects and crops the signature in
+  both images using the DETR model (default is `false`)
+* `threshold` – similarity threshold (default `0.35`)
+* `model` – detection model used when `detection=true` (`detr` or `yolo`)
+* `preprocessed` – include the preprocessed signatures returned by `SigVerSdk`
+
+The response contains:
+
+```json
+{
+  "forged": false,
+  "similarity": 0.92,
+  "referenceImage": "iVBORw0KGgo...", // optional when preprocessed=true
+  "candidateImage": "iVBORw0KGgo..."  // optional when preprocessed=true
+}
+```
+
+`forged` indicates whether the candidate is considered a forgery. `similarity`
+is the cosine similarity between the signatures (1 means identical). When
+`preprocessed=true` the response also includes the PNG bytes of the signatures
+after preprocessing.
+
+### Integration test results
+
+The integration test suite exercises the API using a few sample pairs from the
+`sigver` dataset. The tests confirm that forged signatures are detected and that
+genuine pairs are accepted.
+
+| Pair type | Reference | Candidate | Forged |
+|-----------|-----------|-----------|-------|
+| Genuine vs forged | `001_01.PNG` | `0119001_01.png` | ✅ |
+| Genuine vs forged | `002_09.PNG` | `0108002_03.png` | ✅ |
+| Genuine vs genuine | `002_01.PNG` | `002_13.PNG` | ✅ |
+| Genuine vs genuine | `001_19.PNG` | `001_09.PNG` | ✅ |
+
+The [sigver README](sigver/README.md) reports the same outcome when verifying a
+larger random sample (30 forged and 30 genuine pairs) with an average time of
+about 19 ms for forgeries and 22 ms for genuine signatures.
