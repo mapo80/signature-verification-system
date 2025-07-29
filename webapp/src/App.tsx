@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Upload, Button, Select, Switch, Spin, Slider } from 'antd';
+import { Tabs, Upload, Button, Select, Switch, Spin, Slider, Layout, Typography } from 'antd';
 import type { UploadProps } from 'antd';
 import type { DetectResponseDto, VerifyResponseDto } from './api';
 import { DetectionModel, DefaultService } from './api';
@@ -8,6 +8,8 @@ import DetectResult from './components/DetectResult';
 import VerifyResult from './components/VerifyResult';
 
 const { Dragger } = Upload;
+const { Header, Content } = Layout;
+const { Title } = Typography;
 
 function DetectTab() {
   const [file, setFile] = useState<File | null>(null);
@@ -177,12 +179,21 @@ function VerifyTab() {
 
 export default function App() {
   return (
-    <Tabs
-      defaultActiveKey="detect"
-      items={[
-        { key: 'detect', label: 'Detect', children: <DetectTab /> },
-        { key: 'verify', label: 'Verify', children: <VerifyTab /> }
-      ]}
-    />
+    <Layout style={{ background: 'transparent' }}>
+      <Header style={{ background: '#1677ff' }}>
+        <Title style={{ color: '#fff', margin: '14px 0' }} level={3}>
+          Signature Demo
+        </Title>
+      </Header>
+      <Content style={{ paddingTop: 24 }}>
+        <Tabs
+          defaultActiveKey="detect"
+          items={[
+            { key: 'detect', label: 'Detect', children: <DetectTab /> },
+            { key: 'verify', label: 'Verify', children: <VerifyTab /> }
+          ]}
+        />
+      </Content>
+    </Layout>
   );
 }
