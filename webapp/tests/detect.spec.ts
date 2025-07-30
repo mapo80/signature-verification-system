@@ -35,7 +35,7 @@ test('detect signature via UI', async ({ page }, testInfo) => {
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
 
-  const detectButton = page.getByRole('button', { name: 'Detect' });
+  const detectButton = page.getByRole('button', { name: 'Rileva' });
   await detectButton.click();
   await expect(detectButton).toBeDisabled();
   await expect(page.locator('pre')).toBeVisible();

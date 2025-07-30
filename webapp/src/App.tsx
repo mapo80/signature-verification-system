@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Upload, Button, Select, Switch, Spin, Slider, Layout, Typography } from 'antd';
+import { Tabs, Upload, Button, Select, Switch, Spin, Slider, Layout, Typography, message } from 'antd';
 import type { UploadProps } from 'antd';
 import type { DetectResponseDto, VerifyResponseDto } from './api';
 import { DetectionModel, DefaultService } from './api';
@@ -36,6 +36,7 @@ function DetectTab() {
       setResult(res);
     } catch (e) {
       console.error(e);
+      message.error(`Errore: ${(e as Error).message}`);
       setResult(null);
     } finally {
       setLoading(false);
@@ -50,22 +51,22 @@ function DetectTab() {
   }, [preview]);
 
   return (
-    <Spin spinning={loading} tip="Loading">
+    <Spin spinning={loading} tip="Caricamento">
       <div style={{ maxWidth: 600 }}>
         <Dragger beforeUpload={beforeUpload} maxCount={1} showUploadList={false}>
-          <p className="ant-upload-text">Drop image here or click to select</p>
+          <p className="ant-upload-text">Trascina l'immagine qui o clicca per selezionarla</p>
         </Dragger>
         <div style={{ marginTop: 16 }}>
-          <span style={{ marginRight: 8 }}>Model:</span>
+          <span style={{ marginRight: 8 }}>Modello:</span>
           <Select value={model} onChange={setModel} style={{ width: 120 }}>
             <Select.Option value={DetectionModel.Detr}>Detr</Select.Option>
             <Select.Option value={DetectionModel.Yolo}>Yolo</Select.Option>
           </Select>
         </div>
         <div style={{ marginTop: 16 }}>
-          Include Images <Switch checked={includeImages} onChange={setIncludeImages} />
+          Includi immagini <Switch checked={includeImages} onChange={setIncludeImages} />
         </div>
-        <Button type="primary" style={{ marginTop: 16 }} onClick={handleSubmit} disabled={!file || loading} loading={loading}>Detect</Button>
+        <Button type="primary" style={{ marginTop: 16 }} onClick={handleSubmit} disabled={!file || loading} loading={loading}>Rileva</Button>
         {result && preview && <DetectResult result={result} imageSrc={preview} />}
       </div>
     </Spin>
@@ -113,6 +114,7 @@ function VerifyTab() {
       setResult(res);
     } catch (e) {
       console.error(e);
+      message.error(`Errore: ${(e as Error).message}`);
       setResult(null);
     } finally {
       setLoading(false);
@@ -120,10 +122,10 @@ function VerifyTab() {
   };
 
   return (
-    <Spin spinning={loading} tip="Loading">
+    <Spin spinning={loading} tip="Caricamento">
       <div style={{ maxWidth: 600 }}>
         <Dragger beforeUpload={beforeRef} maxCount={1} showUploadList={false}>
-          <p className="ant-upload-text">Drop reference signature</p>
+          <p className="ant-upload-text">Trascina la firma di riferimento</p>
         </Dragger>
         <Dragger
           style={{ marginTop: 16 }}
@@ -131,13 +133,13 @@ function VerifyTab() {
           maxCount={1}
           showUploadList={false}
         >
-          <p className="ant-upload-text">Drop candidate signature</p>
+          <p className="ant-upload-text">Trascina la firma candidata</p>
         </Dragger>
         <div style={{ marginTop: 16 }}>
-          Detection <Switch checked={detection} onChange={setDetection} />
+          Rilevamento <Switch checked={detection} onChange={setDetection} />
         </div>
         <div style={{ marginTop: 16 }}>
-          <span style={{ marginRight: 8 }}>Model:</span>
+          <span style={{ marginRight: 8 }}>Modello:</span>
           <Select
             value={model}
             onChange={setModel}
@@ -149,7 +151,7 @@ function VerifyTab() {
           </Select>
         </div>
         <div style={{ marginTop: 16 }}>
-          Threshold
+          Soglia
           <Slider
             min={0}
             max={1}
@@ -160,7 +162,7 @@ function VerifyTab() {
           />
         </div>
         <div style={{ marginTop: 16 }}>
-          Preprocessed <Switch checked={preprocessed} onChange={setPreprocessed} />
+          Preprocessato <Switch checked={preprocessed} onChange={setPreprocessed} />
         </div>
         <Button
           type="primary"
@@ -169,7 +171,7 @@ function VerifyTab() {
           disabled={!refFile || !candFile || loading}
           loading={loading}
         >
-          Verify
+          Verifica
         </Button>
         {result && <VerifyResult result={result} threshold={threshold} />}
       </div>
@@ -182,15 +184,15 @@ export default function App() {
     <Layout style={{ background: 'transparent' }}>
       <Header style={{ background: '#1677ff' }}>
         <Title style={{ color: '#fff', margin: '14px 0' }} level={3}>
-          Signature Demo
+          Demo Firma
         </Title>
       </Header>
       <Content style={{ paddingTop: 24 }}>
         <Tabs
           defaultActiveKey="detect"
           items={[
-            { key: 'detect', label: 'Detect', children: <DetectTab /> },
-            { key: 'verify', label: 'Verify', children: <VerifyTab /> }
+            { key: 'detect', label: 'Rileva', children: <DetectTab /> },
+            { key: 'verify', label: 'Verifica', children: <VerifyTab /> }
           ]}
         />
       </Content>
