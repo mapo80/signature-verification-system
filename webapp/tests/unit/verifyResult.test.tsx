@@ -11,7 +11,7 @@ describe('VerifyResult', () => {
 
   it('shows check icon when not forged', () => {
     render(<VerifyResult result={base} threshold={0.5} />);
-    expect(screen.getByText(/similarity:/i)).toBeTruthy();
+    expect(screen.getByText(/somiglianza:/i)).toBeTruthy();
     expect(document.querySelector('.anticon-check-circle')).toBeTruthy();
   });
 

@@ -21,14 +21,14 @@ test('verify signatures via UI', async ({ page }, testInfo) => {
   });
 
   await page.goto('/');
-  await page.getByRole('tab', { name: 'Verify' }).click();
+  await page.getByRole('tab', { name: 'Verifica' }).click();
   const data = fs.readFileSync(imgPath);
   await page.evaluate(([ref, cand]) => {
     const file = new File([new Uint8Array(ref)], 'sample.png', { type: 'image/png' });
     (window as any).__setRefFile(file);
     (window as any).__setCandFile(file);
   }, [data, data]);
-  const verifyButton = page.getByRole('button', { name: 'Verify' });
+  const verifyButton = page.getByRole('button', { name: 'Verifica' });
   await verifyButton.click({ force: true });
   await expect(verifyButton).toBeDisabled();
   await expect(page.locator('pre')).toBeVisible();
