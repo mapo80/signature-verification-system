@@ -62,7 +62,7 @@ export default function DetectResult({ result, imageSrc }: DetectResultProps) {
         <img
           ref={imgRef}
           src={imageSrc}
-          alt="document"
+          alt="documento"
           onLoad={handleLoad}
           style={{ width: '100%', height: 'auto', display: 'block' }}
         />
@@ -71,8 +71,8 @@ export default function DetectResult({ result, imageSrc }: DetectResultProps) {
       {result.signatures?.map((sig, idx) =>
         sig.imageData ? (
           <div key={idx} style={{ marginTop: 16 }}>
-            <Image src={`data:image/png;base64,${sig.imageData}`} alt="signature" />
-            <div>Confidence: {sig.confidence?.toFixed(2)}</div>
+            <Image src={`data:image/png;base64,${sig.imageData}`} alt="firma" />
+            <div>Affidabilità: {sig.confidence?.toFixed(2)}</div>
           </div>
         ) : null
       )}

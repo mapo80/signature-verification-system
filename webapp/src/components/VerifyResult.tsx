@@ -12,7 +12,7 @@ export default function VerifyResult({ result, threshold }: VerifyResultProps) {
     <div style={{ marginTop: 24 }}>
       <pre>{JSON.stringify(result, null, 2)}</pre>
       <div style={{ marginTop: 8, fontSize: 18 }}>
-        Forged:{' '}
+        Contraffatta:{' '}
         {result.forged ? (
           <CloseCircleTwoTone twoToneColor="red" />
         ) : (
@@ -20,13 +20,13 @@ export default function VerifyResult({ result, threshold }: VerifyResultProps) {
         )}
       </div>
       <div style={{ marginTop: 8 }}>
-        Similarity: {result.similarity?.toFixed(2)} (threshold {threshold.toFixed(2)})
+        Somiglianza: {result.similarity?.toFixed(2)} (soglia {threshold.toFixed(2)})
       </div>
       {result.referenceImage && (
         <div style={{ marginTop: 16 }}>
           <Image
             src={`data:image/png;base64,${result.referenceImage}`}
-            alt="reference"
+            alt="riferimento"
           />
         </div>
       )}
@@ -34,7 +34,7 @@ export default function VerifyResult({ result, threshold }: VerifyResultProps) {
         <div style={{ marginTop: 16 }}>
           <Image
             src={`data:image/png;base64,${result.candidateImage}`}
-            alt="candidate"
+            alt="candidata"
           />
         </div>
       )}
