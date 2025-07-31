@@ -21,9 +21,9 @@ describe('VerifyTab', () => {
       })),
     });
 
-    const spy = vi
-      .spyOn(DefaultService, 'verifySignature')
-      .mockResolvedValue({ forged: false });
+      const spy = vi
+        .spyOn(DefaultService, 'verifySignature')
+        .mockResolvedValue({ forged: false });
 
     const { getByRole, getByTestId } = render(<App />);
     await fireEvent.click(getByRole('tab', { name: 'Verifica' }));
@@ -37,8 +37,8 @@ describe('VerifyTab', () => {
 
     await fireEvent.click(getByRole('button', { name: 'Verifica' }));
 
-    expect(spy).toHaveBeenCalled();
-    const args = spy.mock.calls[0];
-    expect(args[2]).toBeCloseTo(2.5);
+      expect(spy).toHaveBeenCalled();
+      const args = spy.mock.calls[0][0];
+      expect(args.temperature).toBeCloseTo(2.5);
+    });
   });
-});

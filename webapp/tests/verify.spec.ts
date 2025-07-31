@@ -11,16 +11,17 @@ test('verify signatures via UI', async ({ page }, testInfo) => {
   const imgPath = path.join(assetDir, 'sample.png');
   fs.writeFileSync(imgPath, Buffer.from(sampleBase64, 'base64'));
 
-  await page.route('**/signature/verify**', async route => {
-    const url = new URL(route.request().url());
-    expect(url.searchParams.get('temperature')).toBe('1.5');
-    await page.waitForTimeout(1200);
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ forged: false, similarity: 0.9 })
+    await page.route('**/signature/verify**', async route => {
+      const body = route.request().postData() ?? '';
+      expect(body).toContain('name="temperature"');
+      expect(body).toContain('\r\n\r\n1.5');
+      await page.waitForTimeout(1200);
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ forged: false, similarity: 0.9 })
+      });
     });
-  });
 
   await page.goto('/');
   await page.getByRole('tab', { name: 'Verifica' }).click();

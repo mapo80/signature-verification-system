@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Upload, Button, Switch, Spin, Slider, Layout, Typography, message, InputNumber } from 'antd';
+import { Tabs, Upload, Button, Switch, Spin, Slider, Layout, Typography, message, InputNumber, Tooltip } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import type { DetectResponseDto, VerifyResponseDto, PipelineConfig } from './api';
 import { DefaultService, DEFAULT_PIPELINE_CONFIG } from './api';
@@ -11,6 +12,15 @@ import PipelineConfigForm from './components/PipelineConfigForm';
 const { Dragger } = Upload;
 const { Header, Content } = Layout;
 const { Title } = Typography;
+
+const info = (text: string, hint: string) => (
+  <span>
+    {text}
+    <Tooltip title={hint}>
+      <InfoCircleOutlined style={{ marginLeft: 4 }} />
+    </Tooltip>
+  </span>
+);
 
 function DetectTab() {
   const [file, setFile] = useState<File | null>(null);
@@ -38,51 +48,11 @@ function DetectTab() {
     if (!file) return;
     setLoading(true);
     try {
-      const {
-        enableYoloV8,
-        enableDetr,
-        strategy,
-        yoloConfidenceThreshold,
-        yoloNmsIoU,
-        detrConfidenceThreshold,
-        fallbackFp,
-        fallbackFn,
-        eceDetr,
-        eceYolo,
-        ensembleThreshold,
-        enableShapeRoiV2,
-        shapeMinAspect,
-        shapeMaxAspect,
-        lowConfidence,
-        highConfidence,
-        cropMarginPerc,
-        roiConfirmIoU,
-        uncertainQuantile,
-      } = config;
-
-      const res = await DefaultService.detectSignature(
-        { file },
+      const res = await DefaultService.detectSignature({
+        file,
         includeImages,
-        enableYoloV8,
-        enableDetr,
-        strategy,
-        yoloConfidenceThreshold,
-        yoloNmsIoU,
-        detrConfidenceThreshold,
-        fallbackFp,
-        fallbackFn,
-        eceDetr,
-        eceYolo,
-        ensembleThreshold,
-        enableShapeRoiV2,
-        shapeMinAspect,
-        shapeMaxAspect,
-        lowConfidence,
-        highConfidence,
-        cropMarginPerc,
-        roiConfirmIoU,
-        uncertainQuantile
-      );
+        config: new Blob([JSON.stringify(config)], { type: 'application/json' })
+      });
       setResult(res);
     } catch (e) {
       console.error(e);
@@ -107,7 +77,7 @@ function DetectTab() {
           <p className="ant-upload-text">Trascina l'immagine qui o clicca per selezionarla</p>
         </Dragger>
         <div style={{ marginTop: 16 }}>
-          Includi immagini <Switch checked={includeImages} onChange={setIncludeImages} />
+          {info('Includi immagini', "Restituisce l'immagine ritagliata per ogni firma rilevata")} <Switch checked={includeImages} onChange={setIncludeImages} />
         </div>
         <div style={{ marginTop: 16 }}>
           <PipelineConfigForm value={config} onChange={setConfig} />
@@ -151,54 +121,15 @@ function VerifyTab() {
     if (!refFile || !candFile) return;
     setLoading(true);
     try {
-      const {
-        enableYoloV8,
-        enableDetr,
-        strategy,
-        yoloConfidenceThreshold,
-        yoloNmsIoU,
-        detrConfidenceThreshold,
-        fallbackFp,
-        fallbackFn,
-        eceDetr,
-        eceYolo,
-        ensembleThreshold,
-        enableShapeRoiV2,
-        shapeMinAspect,
-        shapeMaxAspect,
-        lowConfidence,
-        highConfidence,
-        cropMarginPerc,
-        roiConfirmIoU,
-        uncertainQuantile,
-      } = config;
-
-      const res = await DefaultService.verifySignature(
-        { reference: refFile, candidate: candFile },
+      const res = await DefaultService.verifySignature({
+        reference: refFile,
+        candidate: candFile,
         detection,
         temperature,
         threshold,
         preprocessed,
-        enableYoloV8,
-        enableDetr,
-        strategy,
-        yoloConfidenceThreshold,
-        yoloNmsIoU,
-        detrConfidenceThreshold,
-        fallbackFp,
-        fallbackFn,
-        eceDetr,
-        eceYolo,
-        ensembleThreshold,
-        enableShapeRoiV2,
-        shapeMinAspect,
-        shapeMaxAspect,
-        lowConfidence,
-        highConfidence,
-        cropMarginPerc,
-        roiConfirmIoU,
-        uncertainQuantile
-      );
+        config: new Blob([JSON.stringify(config)], { type: 'application/json' })
+      });
       setResult(res);
     } catch (e) {
       console.error(e);
@@ -224,10 +155,10 @@ function VerifyTab() {
           <p className="ant-upload-text">Trascina la firma candidata</p>
         </Dragger>
         <div style={{ marginTop: 16 }}>
-          Rilevamento <Switch checked={detection} onChange={setDetection} />
+          {info('Rilevamento', 'Esegue il rilevamento automatico della firma prima della verifica')} <Switch checked={detection} onChange={setDetection} />
         </div>
         <div style={{ marginTop: 16 }}>
-          Temperatura
+          {info('Temperatura', 'Parametro di scaling per calibrare le probabilità')}
           <InputNumber
             min={0}
             step={0.001}
@@ -237,7 +168,7 @@ function VerifyTab() {
           />
         </div>
         <div style={{ marginTop: 16 }}>
-          Soglia
+          {info('Soglia', 'Soglia di decisione tra firma genuina e falsa')}
           <Slider
             min={0}
             max={1}
@@ -248,7 +179,7 @@ function VerifyTab() {
           />
         </div>
         <div style={{ marginTop: 16 }}>
-          Preprocessato <Switch checked={preprocessed} onChange={setPreprocessed} />
+          {info('Preprocessato', 'Indica se le firme sono già segmentate e normalizzate')} <Switch checked={preprocessed} onChange={setPreprocessed} />
         </div>
         <div style={{ marginTop: 16 }}>
           <PipelineConfigForm value={config} onChange={setConfig} />
