@@ -3,7 +3,7 @@ info:
   title: Signature Verification API
   version: 1.0.0
 servers:
-  - url: http://localhost:5217
+  - url: /
 paths:
   /signature/detect:
     post:
