@@ -17,9 +17,9 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Theory]
-    [InlineData("detr", false)]
-    [InlineData("yolo", true)]
-    public async Task DetectEndpoint_ReturnsDetections(string model, bool includeImages)
+    [InlineData("EnableYoloV8=false&EnableDetr=true", false)]
+    [InlineData("EnableYoloV8=true&EnableDetr=false", true)]
+    public async Task DetectEndpoint_ReturnsDetections(string config, bool includeImages)
     {
         if (!ShouldRun) return;
         using var client = _factory.CreateClient();
@@ -30,7 +30,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var fileContent = new StreamContent(fs);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "file", Path.GetFileName(imagePath));
-        var response = await client.PostAsync($"/signature/detect?model={model}&includeImages={includeImages}", content);
+        var response = await client.PostAsync($"/signature/detect?{config}&includeImages={includeImages}", content);
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
@@ -71,17 +71,19 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         foreach (var dataset in new[] { "dataset1", "dataset2" })
         {
             var imagesDir = Path.Combine(root, "signature-detection", "dataset", dataset, "images");
+            if (!Directory.Exists(imagesDir))
+                continue;
             foreach (var file in Directory.EnumerateFiles(imagesDir).Take(10))
             {
-                yield return new object[] { "detr", file };
-                yield return new object[] { "yolo", file };
+                yield return new object[] { "EnableYoloV8=false&EnableDetr=true", file };
+                yield return new object[] { "EnableYoloV8=true&EnableDetr=false", file };
             }
         }
     }
 
     [Theory]
     [MemberData(nameof(GetDatasetImages))]
-    public async Task DetectEndpoint_WorksForDatasetImages(string model, string imagePath)
+    public async Task DetectEndpoint_WorksForDatasetImages(string config, string imagePath)
     {
         if (!ShouldRun) return;
         using var client = _factory.CreateClient();
@@ -91,7 +93,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "file", Path.GetFileName(imagePath));
 
-        var response = await client.PostAsync($"/signature/detect?model={model}", content);
+        var response = await client.PostAsync($"/signature/detect?{config}", content);
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {

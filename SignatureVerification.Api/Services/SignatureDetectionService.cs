@@ -1,25 +1,25 @@
 using SignatureDetectionSdk;
-using SignatureVerification.Api.Models;
 using SignatureVerification.Api.Exceptions;
 
 namespace SignatureVerification.Api.Services;
 
 public class SignatureDetectionService
 {
-    private readonly SignatureDetector _detr;
-    private readonly YoloV8Detector _yolo;
+    private readonly string _detrModelPath;
+    private readonly string _yoloModelPath;
+    private readonly string? _datasetDir;
 
-    public SignatureDetectionService(string detrModelPath, string yoloModelPath)
+    public SignatureDetectionService(string detrModelPath, string yoloModelPath, string? datasetDir = null)
     {
-        _detr = new SignatureDetector(detrModelPath);
-        _yolo = new YoloV8Detector(yoloModelPath);
+        _detrModelPath = detrModelPath;
+        _yoloModelPath = yoloModelPath;
+        _datasetDir = datasetDir;
     }
 
-    public IReadOnlyList<float[]> Predict(string imagePath, DetectionModel model)
+    public IReadOnlyList<float[]> Predict(string imagePath, PipelineConfig? config = null)
     {
-        var dets = model == DetectionModel.Yolo ?
-            _yolo.Predict(imagePath) :
-            _detr.Predict(imagePath);
+        using var pipeline = new DetectionPipeline(_detrModelPath, _yoloModelPath, config, _datasetDir);
+        var dets = pipeline.Detect(imagePath);
 
         if (dets.Length == 0)
             throw new SignatureNotFoundException();

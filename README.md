@@ -50,10 +50,7 @@ Execute the API project from the repository root:
 dotnet run --project SignatureVerification.Api
 ```
 
-The service exposes a `POST /signature/detect` endpoint accepting an image file as form data. Two query parameters control the response:
-
-* `includeImages` - when `true`, each detection includes the cropped signature image
-* `model` - choose `detr` (default) or `yolo` to select the detection model
+The service exposes a `POST /signature/detect` endpoint accepting an image file as form data. Query parameters map directly to the fields of the `PipelineConfig` record so all detection options can be tuned. The optional `includeImages` flag controls whether each detection also contains the cropped signature image.
 
 The endpoint returns the detected signatures with confidence and bounding box coordinates.
 If no signatures are detected the service responds with the message `"Nessuna signature identificata"`.
@@ -62,7 +59,7 @@ If no signatures are detected the service responds with the message `"Nessuna si
 
 ```bash
 curl -X POST \
-     "http://localhost:5000/signature/detect?model=detr&includeImages=true" \
+     "http://localhost:5000/signature/detect?EnableYoloV8=false&EnableDetr=true&includeImages=true" \
      -F "file=@path/to/document.jpg"
 ```
 
@@ -107,10 +104,11 @@ The request accepts two files as form data:
 Query parameters:
 
 * `detection` – when `true` the service first detects and crops the signature in
-  both images using the DETR model (default is `false`)
+  both images (default is `false`)
 * `threshold` – similarity threshold (default `0.35`)
-* `model` – detection model used when `detection=true` (`detr` or `yolo`)
 * `preprocessed` – include the preprocessed signatures returned by `SigVerSdk`
+* any `PipelineConfig` field – optional parameters used during detection when
+  `detection=true`
 
 The response contains:
 
@@ -147,13 +145,13 @@ about 19 ms for forgeries and 22 ms for genuine signatures.
 
 ### Web UI test
 
-The `webapp` folder contains an end-to-end Playwright test that exercises the full detection flow. It uploads a sample image, selects the `yolo` model, waits for the loading spinner and finally verifies the mocked response.
+The `webapp` folder contains an end-to-end Playwright test that exercises the full detection flow. It uploads a sample image, waits for the loading spinner and finally verifies the mocked response.
 
 ![Detection screenshot](webapp/docs/detect_full.png)
 
 <video src="webapp/docs/detect_demo.mp4" controls></video>
 
-The web UI also includes a **Verify** tab where you can compare two signatures. Provide a reference and a candidate image, optionally enable detection, choose the model, adjust the similarity threshold and decide whether to return the preprocessed signatures. The result shows a green check or red cross according to the `forged` field, the similarity value and, when requested, the processed images.
+The web UI also includes a **Verify** tab where you can compare two signatures. Provide a reference and a candidate image, optionally enable detection, adjust the similarity threshold and decide whether to return the preprocessed signatures. The result shows a green check or red cross according to the `forged` field, the similarity value and, when requested, the processed images.
 
 ![Verify screenshot](webapp/docs/verify_full.png)
 
