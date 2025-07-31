@@ -85,7 +85,8 @@ public class SignatureController : ControllerBase
         IFormFile reference,
         IFormFile candidate,
         [FromQuery] bool detection = false,
-        [FromQuery] float threshold = 0.35f,
+        [FromQuery] float temperature = 1.008f,
+        [FromQuery] float threshold = 0.0010f,
         [FromQuery] bool preprocessed = false,
         [FromQuery] PipelineConfig? config = null)
     {
@@ -102,7 +103,7 @@ public class SignatureController : ControllerBase
 
         try
         {
-            var result = _verifier.Verify(refFile, candFile, detection, threshold, preprocessed, config);
+            var result = _verifier.Verify(refFile, candFile, detection, temperature, threshold, preprocessed, config);
             return Ok(result);
         }
         catch (Exception ex)

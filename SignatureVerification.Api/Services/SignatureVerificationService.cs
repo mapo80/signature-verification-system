@@ -8,12 +8,14 @@ namespace SignatureVerification.Api.Services;
 public class SignatureVerificationService : IDisposable
 {
     private readonly SignatureDetectionService _detector;
-    private readonly SigVerifier _verifier;
+    private readonly SigVerifier _signet;
+    private readonly SigVerifier _signetF;
 
-    public SignatureVerificationService(SignatureDetectionService detector, string modelPath)
+    public SignatureVerificationService(SignatureDetectionService detector, string signetPath, string signetFPath)
     {
         _detector = detector;
-        _verifier = new SigVerifier(modelPath);
+        _signet = new SigVerifier(signetPath);
+        _signetF = new SigVerifier(signetFPath);
     }
 
     private static string Crop(string imagePath, float[] bbox)
@@ -33,7 +35,7 @@ public class SignatureVerificationService : IDisposable
     }
 
     public VerifyResponseDto Verify(string referencePath, string candidatePath, bool detection,
-        float threshold, bool includePreprocessed, PipelineConfig? config = null)
+        float temperature, float threshold, bool includePreprocessed, PipelineConfig? config = null)
     {
         string refImg = referencePath;
         string candImg = candidatePath;
@@ -62,23 +64,33 @@ public class SignatureVerificationService : IDisposable
             {
                 pre1 = Path.ChangeExtension(Path.GetTempFileName(), ".png");
                 pre2 = Path.ChangeExtension(Path.GetTempFileName(), ".png");
-                _verifier.SavePreprocessed(refImg, pre1);
-                _verifier.SavePreprocessed(candImg, pre2);
+                _signet.SavePreprocessed(refImg, pre1);
+                _signet.SavePreprocessed(candImg, pre2);
                 refPre = System.IO.File.ReadAllBytes(pre1);
                 candPre = System.IO.File.ReadAllBytes(pre2);
                 refForFeatures = pre1;
                 candForFeatures = pre2;
             }
 
-            var refFeat = _verifier.ExtractFeatures(refForFeatures);
-            var candFeat = _verifier.ExtractFeatures(candForFeatures);
-            SigVerifier.Normalize(refFeat);
-            SigVerifier.Normalize(candFeat);
-            var dist = SigVerifier.CosineDistance(refFeat, candFeat);
+            var refFeat1 = _signet.ExtractFeatures(refForFeatures);
+            var candFeat1 = _signet.ExtractFeatures(candForFeatures);
+            SigVerifier.Normalize(refFeat1);
+            SigVerifier.Normalize(candFeat1);
+            var d1 = (float)SigVerifier.CosineDistance(refFeat1, candFeat1);
+
+            var refFeat2 = _signetF.ExtractFeatures(refForFeatures);
+            var candFeat2 = _signetF.ExtractFeatures(candForFeatures);
+            SigVerifier.Normalize(refFeat2);
+            SigVerifier.Normalize(candFeat2);
+            var d2 = (float)SigVerifier.CosineDistance(refFeat2, candFeat2);
+
+            var sMin = MathF.Min(d1, d2);
+            var sCal = sMin / temperature;
+
             return new VerifyResponseDto
             {
-                Forged = dist > threshold,
-                Similarity = 1 - (float)dist,
+                Forged = sCal > threshold,
+                Similarity = 1 - sCal,
                 ReferenceImage = refPre,
                 CandidateImage = candPre
             };
@@ -94,6 +106,7 @@ public class SignatureVerificationService : IDisposable
 
     public void Dispose()
     {
-        _verifier.Dispose();
+        _signet.Dispose();
+        _signetF.Dispose();
     }
 }

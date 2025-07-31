@@ -14,14 +14,15 @@ Simple React + Vite frontend built with Ant Design to interact with the signatur
 - **Verify tab**
   - Two drop areas for reference and candidate signatures
   - Optional detection step with selectable model (`Detr` or `Yolo`)
-  - Threshold slider from 0 to 1 and checkbox to include preprocessed images
+  - Temperature input and threshold slider to tune verification
+  - Checkbox to include preprocessed images
   - Display JSON response with a green check or red cross for `forged`
   - Show similarity value and the returned preprocessed images when requested
 
   **Inputs**
   - `detection` – enable signature detection before verification
-  - `model` – `Detr` or `Yolo`, required when detection is on
-  - `threshold` – similarity value from 0 to 1
+  - `temperature` – scaling factor applied to distances
+  - `threshold` – similarity value after calibration (default 0.001)
   - `preprocessed` – return the processed reference and candidate images
 
   **Output**

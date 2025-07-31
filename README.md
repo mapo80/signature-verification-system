@@ -111,7 +111,8 @@ Query parameters:
 
 * `detection` – when `true` the service first detects and crops the signature in
   both images (default is `false`)
-* `threshold` – similarity threshold (default `0.35`)
+* `temperature` – temperature scaling factor (default `1.008`)
+* `threshold` – similarity threshold after calibration (default `0.0010`)
 * `preprocessed` – include the preprocessed signatures returned by `SigVerSdk`
 * any `PipelineConfig` field – optional parameters used during detection when
   `detection=true`
@@ -128,9 +129,9 @@ The response contains:
 ```
 
 `forged` indicates whether the candidate is considered a forgery. `similarity`
-is the cosine similarity between the signatures (1 means identical). When
-`preprocessed=true` the response also includes the PNG bytes of the signatures
-after preprocessing.
+is `1 – s_cal`, i.e. one minus the calibrated distance between the signatures
+(1 means identical). When `preprocessed=true` the response also includes the
+PNG bytes of the signatures after preprocessing.
 
 ### Integration test results
 
