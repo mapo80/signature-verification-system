@@ -24,10 +24,113 @@ paths:
           schema:
             type: boolean
           required: false
-        - name: model
+        - name: enableYoloV8
           in: query
           schema:
-            $ref: '#/components/schemas/DetectionModel'
+            type: boolean
+          required: false
+        - name: enableDetr
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: strategy
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: yoloConfidenceThreshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: yoloNmsIoU
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: detrConfidenceThreshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: fallbackFp
+          in: query
+          schema:
+            type: integer
+          required: false
+        - name: fallbackFn
+          in: query
+          schema:
+            type: integer
+          required: false
+        - name: eceDetr
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: eceYolo
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: ensembleThreshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: enableShapeRoiV2
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: shapeMinAspect
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: shapeMaxAspect
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: lowConfidence
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: highConfidence
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: cropMarginPerc
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: roiConfirmIoU
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: uncertainQuantile
+          in: query
+          schema:
+            type: number
+            format: float
           required: false
       responses:
         '200':
@@ -64,15 +167,118 @@ paths:
             type: number
             format: float
           required: false
-        - name: model
-          in: query
-          schema:
-            $ref: '#/components/schemas/DetectionModel'
-          required: false
         - name: preprocessed
           in: query
           schema:
             type: boolean
+          required: false
+        - name: enableYoloV8
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: enableDetr
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: strategy
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: yoloConfidenceThreshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: yoloNmsIoU
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: detrConfidenceThreshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: fallbackFp
+          in: query
+          schema:
+            type: integer
+          required: false
+        - name: fallbackFn
+          in: query
+          schema:
+            type: integer
+          required: false
+        - name: eceDetr
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: eceYolo
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: ensembleThreshold
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: enableShapeRoiV2
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - name: shapeMinAspect
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: shapeMaxAspect
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: lowConfidence
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: highConfidence
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: cropMarginPerc
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: roiConfirmIoU
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
+        - name: uncertainQuantile
+          in: query
+          schema:
+            type: number
+            format: float
           required: false
       responses:
         '200':
@@ -127,8 +333,3 @@ components:
           type: string
           format: byte
           nullable: true
-    DetectionModel:
-      type: string
-      enum:
-        - Detr
-        - Yolo

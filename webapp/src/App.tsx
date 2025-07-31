@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Upload, Button, Select, Switch, Spin, Slider, Layout, Typography, message } from 'antd';
+import { Tabs, Upload, Button, Switch, Spin, Slider, Layout, Typography, message } from 'antd';
 import type { UploadProps } from 'antd';
-import type { DetectResponseDto, VerifyResponseDto } from './api';
-import { DetectionModel, DefaultService } from './api';
+import type { DetectResponseDto, VerifyResponseDto, PipelineConfig } from './api';
+import { DefaultService, DEFAULT_PIPELINE_CONFIG } from './api';
 import 'antd/dist/reset.css';
 import DetectResult from './components/DetectResult';
 import VerifyResult from './components/VerifyResult';
+import PipelineConfigForm from './components/PipelineConfigForm';
 
 const { Dragger } = Upload;
 const { Header, Content } = Layout;
@@ -14,10 +15,10 @@ const { Title } = Typography;
 function DetectTab() {
   const [file, setFile] = useState<File | null>(null);
   const [includeImages, setIncludeImages] = useState(false);
-  const [model, setModel] = useState<DetectionModel>(DetectionModel.Detr);
   const [result, setResult] = useState<DetectResponseDto | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [config, setConfig] = useState<PipelineConfig>(DEFAULT_PIPELINE_CONFIG);
 
 
   const beforeUpload: UploadProps['beforeUpload'] = (f) => {
@@ -32,7 +33,7 @@ function DetectTab() {
     if (!file) return;
     setLoading(true);
     try {
-      const res = await DefaultService.detectSignature({ file }, includeImages, model);
+      const res = await DefaultService.detectSignature({ file }, includeImages, config);
       setResult(res);
     } catch (e) {
       console.error(e);
@@ -57,14 +58,10 @@ function DetectTab() {
           <p className="ant-upload-text">Trascina l'immagine qui o clicca per selezionarla</p>
         </Dragger>
         <div style={{ marginTop: 16 }}>
-          <span style={{ marginRight: 8 }}>Modello:</span>
-          <Select value={model} onChange={setModel} style={{ width: 120 }}>
-            <Select.Option value={DetectionModel.Detr}>Detr</Select.Option>
-            <Select.Option value={DetectionModel.Yolo}>Yolo</Select.Option>
-          </Select>
+          Includi immagini <Switch checked={includeImages} onChange={setIncludeImages} />
         </div>
         <div style={{ marginTop: 16 }}>
-          Includi immagini <Switch checked={includeImages} onChange={setIncludeImages} />
+          <PipelineConfigForm value={config} onChange={setConfig} />
         </div>
         <Button type="primary" style={{ marginTop: 16 }} onClick={handleSubmit} disabled={!file || loading} loading={loading}>Rileva</Button>
         {result && preview && <DetectResult result={result} imageSrc={preview} />}
@@ -77,11 +74,11 @@ function VerifyTab() {
   const [refFile, setRefFile] = useState<File | null>(null);
   const [candFile, setCandFile] = useState<File | null>(null);
   const [detection, setDetection] = useState(false);
-  const [model, setModel] = useState<DetectionModel>(DetectionModel.Detr);
   const [threshold, setThreshold] = useState(0.35);
   const [preprocessed, setPreprocessed] = useState(false);
   const [result, setResult] = useState<VerifyResponseDto | null>(null);
   const [loading, setLoading] = useState(false);
+  const [config, setConfig] = useState<PipelineConfig>(DEFAULT_PIPELINE_CONFIG);
 
   // expose setters for testing
   useEffect(() => {
@@ -108,8 +105,8 @@ function VerifyTab() {
         { reference: refFile, candidate: candFile },
         detection,
         threshold,
-        detection ? model : undefined,
-        preprocessed
+        preprocessed,
+        config
       );
       setResult(res);
     } catch (e) {
@@ -139,18 +136,6 @@ function VerifyTab() {
           Rilevamento <Switch checked={detection} onChange={setDetection} />
         </div>
         <div style={{ marginTop: 16 }}>
-          <span style={{ marginRight: 8 }}>Modello:</span>
-          <Select
-            value={model}
-            onChange={setModel}
-            style={{ width: 120 }}
-            disabled={!detection}
-          >
-            <Select.Option value={DetectionModel.Detr}>Detr</Select.Option>
-            <Select.Option value={DetectionModel.Yolo}>Yolo</Select.Option>
-          </Select>
-        </div>
-        <div style={{ marginTop: 16 }}>
           Soglia
           <Slider
             min={0}
@@ -163,6 +148,9 @@ function VerifyTab() {
         </div>
         <div style={{ marginTop: 16 }}>
           Preprocessato <Switch checked={preprocessed} onChange={setPreprocessed} />
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <PipelineConfigForm value={config} onChange={setConfig} />
         </div>
         <Button
           type="primary"

@@ -1,4 +1,5 @@
 using SigVerSdk;
+using SignatureDetectionSdk;
 using SignatureVerification.Api.Models;
 using SkiaSharp;
 
@@ -32,7 +33,7 @@ public class SignatureVerificationService : IDisposable
     }
 
     public VerifyResponseDto Verify(string referencePath, string candidatePath, bool detection,
-        float threshold, DetectionModel model, bool includePreprocessed)
+        float threshold, bool includePreprocessed, PipelineConfig? config = null)
     {
         string refImg = referencePath;
         string candImg = candidatePath;
@@ -44,10 +45,11 @@ public class SignatureVerificationService : IDisposable
         {
             if (detection)
             {
-                var refDet = _detector.Predict(referencePath, model).OrderByDescending(d => d[4]).First();
+                var cfg = config ?? new PipelineConfig();
+                var refDet = _detector.Predict(referencePath, cfg).OrderByDescending(d => d[4]).First();
                 tmp1 = Crop(referencePath, refDet);
                 refImg = tmp1;
-                var candDet = _detector.Predict(candidatePath, model).OrderByDescending(d => d[4]).First();
+                var candDet = _detector.Predict(candidatePath, cfg).OrderByDescending(d => d[4]).First();
                 tmp2 = Crop(candidatePath, candDet);
                 candImg = tmp2;
             }

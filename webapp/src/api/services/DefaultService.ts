@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DetectionModel } from '../models/DetectionModel';
 import type { DetectResponseDto } from '../models/DetectResponseDto';
 import type { VerifyResponseDto } from '../models/VerifyResponseDto';
+import type { PipelineConfig } from '../models/PipelineConfig';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -12,7 +12,6 @@ export class DefaultService {
     /**
      * @param formData
      * @param includeImages
-     * @param model
      * @returns DetectResponseDto Success
      * @throws ApiError
      */
@@ -21,14 +20,14 @@ export class DefaultService {
             file?: Blob;
         },
         includeImages?: boolean,
-        model?: DetectionModel,
+        config?: PipelineConfig,
     ): CancelablePromise<DetectResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/signature/detect',
             query: {
                 'includeImages': includeImages,
-                'model': model,
+                ...config,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -38,7 +37,6 @@ export class DefaultService {
      * @param formData
      * @param detection
      * @param threshold
-     * @param model
      * @param preprocessed
      * @returns VerifyResponseDto Success
      * @throws ApiError
@@ -50,8 +48,8 @@ export class DefaultService {
         },
         detection?: boolean,
         threshold?: number,
-        model?: DetectionModel,
         preprocessed?: boolean,
+        config?: PipelineConfig,
     ): CancelablePromise<VerifyResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -59,8 +57,8 @@ export class DefaultService {
             query: {
                 'detection': detection,
                 'threshold': threshold,
-                'model': model,
                 'preprocessed': preprocessed,
+                ...config,
             },
             formData: formData,
             mediaType: 'multipart/form-data',

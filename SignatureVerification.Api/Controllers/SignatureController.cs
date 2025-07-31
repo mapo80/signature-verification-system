@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using SkiaSharp;
+using SignatureDetectionSdk;
 using SignatureVerification.Api.Models;
 using SignatureVerification.Api.Services;
 
@@ -24,7 +25,7 @@ public class SignatureController : ControllerBase
     public async Task<ActionResult<DetectResponseDto>> Detect(
         IFormFile file,
         [FromQuery] bool includeImages = false,
-        [FromQuery] DetectionModel model = DetectionModel.Detr)
+        [FromQuery] PipelineConfig? config = null)
     {
         var tempFile = Path.GetTempFileName();
         await using (var stream = System.IO.File.Create(tempFile))
@@ -34,7 +35,7 @@ public class SignatureController : ControllerBase
 
         try
         {
-            var predictions = _detector.Predict(tempFile, model);
+            var predictions = _detector.Predict(tempFile, config);
             using var image = SKBitmap.Decode(tempFile);
             var response = new DetectResponseDto
             {
@@ -85,8 +86,8 @@ public class SignatureController : ControllerBase
         IFormFile candidate,
         [FromQuery] bool detection = false,
         [FromQuery] float threshold = 0.35f,
-        [FromQuery] DetectionModel model = DetectionModel.Detr,
-        [FromQuery] bool preprocessed = false)
+        [FromQuery] bool preprocessed = false,
+        [FromQuery] PipelineConfig? config = null)
     {
         var refFile = Path.GetTempFileName();
         var candFile = Path.GetTempFileName();
@@ -101,7 +102,7 @@ public class SignatureController : ControllerBase
 
         try
         {
-            var result = _verifier.Verify(refFile, candFile, detection, threshold, model, preprocessed);
+            var result = _verifier.Verify(refFile, candFile, detection, threshold, preprocessed, config);
             return Ok(result);
         }
         catch (Exception ex)
