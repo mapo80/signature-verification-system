@@ -33,11 +33,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble AS runtime
 WORKDIR /app
 
 # Install native dependencies (shell available)
+# - libuuid1: provides uuid_generate_random required by SkiaSharp
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       libgtk2.0-0 libgdk-pixbuf2.0-0 libtesseract5 \
       libdc1394-25 libavcodec60 libavformat60 libswscale7 \
-      libsm6 libxext6 libxrender1 libgomp1 && \
+      libsm6 libxext6 libxrender1 libgomp1 libuuid1 && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy published API
