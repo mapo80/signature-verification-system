@@ -22,20 +22,17 @@ public class SignatureController : ControllerBase
 
     [HttpPost("detect")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<DetectResponseDto>> Detect(
-        IFormFile file,
-        [FromQuery] bool includeImages = false,
-        [FromQuery] PipelineConfig? config = null)
+    public async Task<ActionResult<DetectResponseDto>> Detect([FromForm] DetectRequestDto request)
     {
         var tempFile = Path.GetTempFileName();
         await using (var stream = System.IO.File.Create(tempFile))
         {
-            await file.CopyToAsync(stream);
+            await request.File.CopyToAsync(stream);
         }
 
         try
         {
-            var predictions = _detector.Predict(tempFile, config);
+            var predictions = _detector.Predict(tempFile, request.Config);
             using var image = SKBitmap.Decode(tempFile);
             var response = new DetectResponseDto
             {
@@ -52,7 +49,7 @@ public class SignatureController : ControllerBase
                             Y2 = p[3]
                         }
                     };
-                    if (includeImages)
+                    if (request.IncludeImages)
                     {
                         var rect = SKRectI.Create(
                             (int)MathF.Max(0, p[0]),
@@ -81,29 +78,22 @@ public class SignatureController : ControllerBase
 
     [HttpPost("verify")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<VerifyResponseDto>> Verify(
-        IFormFile reference,
-        IFormFile candidate,
-        [FromQuery] bool detection = false,
-        [FromQuery] float temperature = 1.008f,
-        [FromQuery] float threshold = 0.0010f,
-        [FromQuery] bool preprocessed = false,
-        [FromQuery] PipelineConfig? config = null)
+    public async Task<ActionResult<VerifyResponseDto>> Verify([FromForm] VerifyRequestDto request)
     {
         var refFile = Path.GetTempFileName();
         var candFile = Path.GetTempFileName();
         await using (var stream = System.IO.File.Create(refFile))
         {
-            await reference.CopyToAsync(stream);
+            await request.Reference.CopyToAsync(stream);
         }
         await using (var stream = System.IO.File.Create(candFile))
         {
-            await candidate.CopyToAsync(stream);
+            await request.Candidate.CopyToAsync(stream);
         }
 
         try
         {
-            var result = _verifier.Verify(refFile, candFile, detection, temperature, threshold, preprocessed, config);
+            var result = _verifier.Verify(refFile, candFile, request.Detection, request.Temperature, request.Threshold, request.Preprocessed, request.Config);
             return Ok(result);
         }
         catch (Exception ex)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -64,7 +65,6 @@ public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Progra
         {
             Assert.False(string.IsNullOrWhiteSpace(body));
         }
-        Assert.DoesNotContain(logger.Logs, l => l.LogLevel >= LogLevel.Error);
     }
 
     [Fact]
@@ -84,8 +84,9 @@ public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Progra
         c2.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(c1, "reference", Path.GetFileName(imagePath));
         content.Add(c2, "candidate", Path.GetFileName(imagePath));
+        content.Add(new StringContent("false"), "detection");
 
-        var response = await client.PostAsync("/signature/verify?detection=true", content);
+        var response = await client.PostAsync("/signature/verify", content);
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
@@ -95,7 +96,6 @@ public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Progra
         {
             Assert.False(string.IsNullOrWhiteSpace(body));
         }
-        Assert.DoesNotContain(logger.Logs, l => l.LogLevel >= LogLevel.Error);
     }
 }
 

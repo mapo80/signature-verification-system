@@ -1,5 +1,7 @@
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.IO;
+using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
@@ -17,8 +19,8 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Theory]
-    [InlineData("EnableYoloV8=false&EnableDetr=true", false)]
-    [InlineData("EnableYoloV8=true&EnableDetr=false", true)]
+    [InlineData("{\"EnableYoloV8\":false,\"EnableDetr\":true}", false)]
+    [InlineData("{\"EnableYoloV8\":true,\"EnableDetr\":false}", true)]
     public async Task DetectEndpoint_ReturnsDetections(string config, bool includeImages)
     {
         if (!ShouldRun) return;
@@ -30,7 +32,9 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var fileContent = new StreamContent(fs);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "file", Path.GetFileName(imagePath));
-        var response = await client.PostAsync($"/signature/detect?{config}&includeImages={includeImages}", content);
+        content.Add(new StringContent(includeImages.ToString()), "includeImages");
+        content.Add(new StringContent(config, System.Text.Encoding.UTF8, "application/json"), "config");
+        var response = await client.PostAsync("/signature/detect", content);
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
@@ -75,8 +79,8 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                 continue;
             foreach (var file in Directory.EnumerateFiles(imagesDir).Take(10))
             {
-                yield return new object[] { "EnableYoloV8=false&EnableDetr=true", file };
-                yield return new object[] { "EnableYoloV8=true&EnableDetr=false", file };
+                yield return new object[] { "{\"EnableYoloV8\":false,\"EnableDetr\":true}", file };
+                yield return new object[] { "{\"EnableYoloV8\":true,\"EnableDetr\":false}", file };
             }
         }
     }
@@ -92,8 +96,9 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var fileContent = new StreamContent(fs);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "file", Path.GetFileName(imagePath));
+        content.Add(new StringContent(config, Encoding.UTF8, "application/json"), "config");
 
-        var response = await client.PostAsync($"/signature/detect?{config}", content);
+        var response = await client.PostAsync("/signature/detect", content);
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
@@ -121,7 +126,9 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var c2 = new StreamContent(fs2); c2.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(c1, "reference", Path.GetFileName(imagePath));
         content.Add(c2, "candidate", Path.GetFileName(imagePath));
-        var response = await client.PostAsync($"/signature/verify?detection={detection}&preprocessed=true", content);
+        content.Add(new StringContent(detection.ToString()), "detection");
+        content.Add(new StringContent("true"), "preprocessed");
+        var response = await client.PostAsync("/signature/verify", content);
         var json = await response.Content.ReadAsStringAsync();
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var dto = System.Text.Json.JsonSerializer.Deserialize<VerifyResponse>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -147,7 +154,8 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var c2 = new StreamContent(fs2); c2.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(c1, "reference", Path.GetFileName(img1));
         content.Add(c2, "candidate", Path.GetFileName(img2));
-        var response = await client.PostAsync("/signature/verify?threshold=0", content);
+        content.Add(new StringContent("0"), "threshold");
+        var response = await client.PostAsync("/signature/verify", content);
         var json = await response.Content.ReadAsStringAsync();
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var dto = System.Text.Json.JsonSerializer.Deserialize<VerifyResponse>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -198,8 +206,9 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var c2 = new StreamContent(fs2); c2.Headers.ContentType = new MediaTypeHeaderValue("image/png");
         content.Add(c1, "reference", Path.GetFileName(referencePath));
         content.Add(c2, "candidate", Path.GetFileName(forgedPath));
+        content.Add(new StringContent("0"), "threshold");
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        var response = await client.PostAsync("/signature/verify?threshold=0", content);
+        var response = await client.PostAsync("/signature/verify", content);
         sw.Stop();
         var json = await response.Content.ReadAsStringAsync();
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
@@ -222,8 +231,9 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var c2 = new StreamContent(fs2); c2.Headers.ContentType = new MediaTypeHeaderValue("image/png");
         content.Add(c1, "reference", Path.GetFileName(referencePath));
         content.Add(c2, "candidate", Path.GetFileName(candidatePath));
+        content.Add(new StringContent("1"), "threshold");
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        var response = await client.PostAsync("/signature/verify?threshold=1", content);
+        var response = await client.PostAsync("/signature/verify", content);
         sw.Stop();
         var json = await response.Content.ReadAsStringAsync();
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
