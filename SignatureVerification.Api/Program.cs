@@ -22,8 +22,10 @@ builder.Services.AddSingleton<SignatureDetectionService>(_ =>
 builder.Services.AddSingleton<SignatureVerificationService>(sp =>
 {
     var detector = sp.GetRequiredService<SignatureDetectionService>();
-    var modelPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "sigver", "models", "signet.onnx"));
-    return new SignatureVerificationService(detector, modelPath);
+    var basePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "sigver", "models"));
+    var signetPath = Path.Combine(basePath, "signet.onnx");
+    var signetFPath = Path.Combine(basePath, "signet_f_lambda_0.95.onnx");
+    return new SignatureVerificationService(detector, signetPath, signetFPath);
 });
 
 

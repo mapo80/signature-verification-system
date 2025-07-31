@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Upload, Button, Switch, Spin, Slider, Layout, Typography, message } from 'antd';
+import { Tabs, Upload, Button, Switch, Spin, Slider, Layout, Typography, message, InputNumber } from 'antd';
 import type { UploadProps } from 'antd';
 import type { DetectResponseDto, VerifyResponseDto, PipelineConfig } from './api';
 import { DefaultService, DEFAULT_PIPELINE_CONFIG } from './api';
@@ -21,19 +21,68 @@ function DetectTab() {
   const [config, setConfig] = useState<PipelineConfig>(DEFAULT_PIPELINE_CONFIG);
 
 
-  const beforeUpload: UploadProps['beforeUpload'] = (f) => {
-    setFile(f as File);
+  const handleChange: UploadProps['onChange'] = info => {
+    const f = info.fileList[0]?.originFileObj as File | undefined;
     setResult(null);
     if (preview) URL.revokeObjectURL(preview);
-    setPreview(URL.createObjectURL(f as File));
-    return false;
+    if (f) {
+      setFile(f);
+      setPreview(URL.createObjectURL(f));
+    } else {
+      setFile(null);
+      setPreview(null);
+    }
   };
 
   const handleSubmit = async () => {
     if (!file) return;
     setLoading(true);
     try {
-      const res = await DefaultService.detectSignature({ file }, includeImages, config);
+      const {
+        enableYoloV8,
+        enableDetr,
+        strategy,
+        yoloConfidenceThreshold,
+        yoloNmsIoU,
+        detrConfidenceThreshold,
+        fallbackFp,
+        fallbackFn,
+        eceDetr,
+        eceYolo,
+        ensembleThreshold,
+        enableShapeRoiV2,
+        shapeMinAspect,
+        shapeMaxAspect,
+        lowConfidence,
+        highConfidence,
+        cropMarginPerc,
+        roiConfirmIoU,
+        uncertainQuantile,
+      } = config;
+
+      const res = await DefaultService.detectSignature(
+        { file },
+        includeImages,
+        enableYoloV8,
+        enableDetr,
+        strategy,
+        yoloConfidenceThreshold,
+        yoloNmsIoU,
+        detrConfidenceThreshold,
+        fallbackFp,
+        fallbackFn,
+        eceDetr,
+        eceYolo,
+        ensembleThreshold,
+        enableShapeRoiV2,
+        shapeMinAspect,
+        shapeMaxAspect,
+        lowConfidence,
+        highConfidence,
+        cropMarginPerc,
+        roiConfirmIoU,
+        uncertainQuantile
+      );
       setResult(res);
     } catch (e) {
       console.error(e);
@@ -54,7 +103,7 @@ function DetectTab() {
   return (
     <Spin spinning={loading} tip="Caricamento">
       <div style={{ maxWidth: 600 }}>
-        <Dragger beforeUpload={beforeUpload} maxCount={1} showUploadList={false}>
+        <Dragger beforeUpload={() => false} maxCount={1} onChange={handleChange}>
           <p className="ant-upload-text">Trascina l'immagine qui o clicca per selezionarla</p>
         </Dragger>
         <div style={{ marginTop: 16 }}>
@@ -74,7 +123,8 @@ function VerifyTab() {
   const [refFile, setRefFile] = useState<File | null>(null);
   const [candFile, setCandFile] = useState<File | null>(null);
   const [detection, setDetection] = useState(false);
-  const [threshold, setThreshold] = useState(0.35);
+  const [temperature, setTemperature] = useState(1.008);
+  const [threshold, setThreshold] = useState(0.001);
   const [preprocessed, setPreprocessed] = useState(false);
   const [result, setResult] = useState<VerifyResponseDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -86,27 +136,68 @@ function VerifyTab() {
     (window as any).__setCandFile = setCandFile;
   }, []);
 
-  const beforeRef: UploadProps['beforeUpload'] = f => {
-    setRefFile(f as File);
+  const handleRefChange: UploadProps['onChange'] = info => {
+    const f = info.fileList[0]?.originFileObj as File | undefined;
+    setRefFile(f ?? null);
     setResult(null);
-    return false;
   };
-  const beforeCand: UploadProps['beforeUpload'] = f => {
-    setCandFile(f as File);
+  const handleCandChange: UploadProps['onChange'] = info => {
+    const f = info.fileList[0]?.originFileObj as File | undefined;
+    setCandFile(f ?? null);
     setResult(null);
-    return false;
   };
 
   const handleSubmit = async () => {
     if (!refFile || !candFile) return;
     setLoading(true);
     try {
+      const {
+        enableYoloV8,
+        enableDetr,
+        strategy,
+        yoloConfidenceThreshold,
+        yoloNmsIoU,
+        detrConfidenceThreshold,
+        fallbackFp,
+        fallbackFn,
+        eceDetr,
+        eceYolo,
+        ensembleThreshold,
+        enableShapeRoiV2,
+        shapeMinAspect,
+        shapeMaxAspect,
+        lowConfidence,
+        highConfidence,
+        cropMarginPerc,
+        roiConfirmIoU,
+        uncertainQuantile,
+      } = config;
+
       const res = await DefaultService.verifySignature(
         { reference: refFile, candidate: candFile },
         detection,
+        temperature,
         threshold,
         preprocessed,
-        config
+        enableYoloV8,
+        enableDetr,
+        strategy,
+        yoloConfidenceThreshold,
+        yoloNmsIoU,
+        detrConfidenceThreshold,
+        fallbackFp,
+        fallbackFn,
+        eceDetr,
+        eceYolo,
+        ensembleThreshold,
+        enableShapeRoiV2,
+        shapeMinAspect,
+        shapeMaxAspect,
+        lowConfidence,
+        highConfidence,
+        cropMarginPerc,
+        roiConfirmIoU,
+        uncertainQuantile
       );
       setResult(res);
     } catch (e) {
@@ -121,14 +212,14 @@ function VerifyTab() {
   return (
     <Spin spinning={loading} tip="Caricamento">
       <div style={{ maxWidth: 600 }}>
-        <Dragger beforeUpload={beforeRef} maxCount={1} showUploadList={false}>
+        <Dragger beforeUpload={() => false} maxCount={1} onChange={handleRefChange}>
           <p className="ant-upload-text">Trascina la firma di riferimento</p>
         </Dragger>
         <Dragger
           style={{ marginTop: 16 }}
-          beforeUpload={beforeCand}
+          beforeUpload={() => false}
           maxCount={1}
-          showUploadList={false}
+          onChange={handleCandChange}
         >
           <p className="ant-upload-text">Trascina la firma candidata</p>
         </Dragger>
@@ -136,11 +227,21 @@ function VerifyTab() {
           Rilevamento <Switch checked={detection} onChange={setDetection} />
         </div>
         <div style={{ marginTop: 16 }}>
+          Temperatura
+          <InputNumber
+            min={0}
+            step={0.001}
+            value={temperature}
+            onChange={v => setTemperature(v ?? 0)}
+            data-testid="temperature-input"
+          />
+        </div>
+        <div style={{ marginTop: 16 }}>
           Soglia
           <Slider
             min={0}
             max={1}
-            step={0.01}
+            step={0.001}
             value={threshold}
             onChange={value => setThreshold(value as number)}
             style={{ width: 200 }}

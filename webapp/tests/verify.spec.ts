@@ -12,6 +12,8 @@ test('verify signatures via UI', async ({ page }, testInfo) => {
   fs.writeFileSync(imgPath, Buffer.from(sampleBase64, 'base64'));
 
   await page.route('**/signature/verify**', async route => {
+    const url = new URL(route.request().url());
+    expect(url.searchParams.get('temperature')).toBe('1.5');
     await page.waitForTimeout(1200);
     await route.fulfill({
       status: 200,
@@ -28,6 +30,7 @@ test('verify signatures via UI', async ({ page }, testInfo) => {
     (window as any).__setRefFile(file);
     (window as any).__setCandFile(file);
   }, [data, data]);
+  await page.getByTestId('temperature-input').fill('1.5');
   const verifyButton = page.getByRole('button', { name: 'Verifica' });
   await verifyButton.click({ force: true });
   await expect(verifyButton).toBeDisabled();

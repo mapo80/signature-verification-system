@@ -29,13 +29,13 @@ test('detect signature via UI', async ({ page }, testInfo) => {
   });
 
   await page.goto('/');
-  const input = page.locator('input[type="file"]');
+  const input = page.locator('input[type="file"]').first();
   await input.setInputFiles(imgPath);
-  await page.getByRole('combobox').click();
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('Enter');
+  await input.setInputFiles([]);
+  await input.setInputFiles(imgPath);
 
   const detectButton = page.getByRole('button', { name: 'Rileva' });
+  await expect(detectButton).toBeEnabled();
   await detectButton.click();
   await expect(detectButton).toBeDisabled();
   await expect(page.locator('pre')).toBeVisible();

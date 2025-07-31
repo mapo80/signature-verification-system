@@ -161,11 +161,18 @@ paths:
           schema:
             type: boolean
           required: false
+        - name: temperature
+          in: query
+          schema:
+            type: number
+            format: float
+          required: false
         - name: threshold
           in: query
           schema:
             type: number
             format: float
+            default: 0.001
           required: false
         - name: preprocessed
           in: query
