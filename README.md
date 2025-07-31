@@ -35,6 +35,12 @@ cat conditional_detr_signature.onnx_parte_{1,2} > conditional_detr_signature.onn
 
 ## Building and Testing
 
+Make sure the git submodules are present so the SDK projects and datasets can be referenced:
+
+```bash
+git submodule update --init --recursive
+```
+
 Restore packages, build the solution and run the integration tests:
 
 ```bash
