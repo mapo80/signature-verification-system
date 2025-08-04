@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using SignatureDetectionSdk;
 using SignatureVerification.Api.Services;
 
@@ -12,12 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<SignatureDetectionService>(_ =>
+builder.Services.AddSingleton<SignatureDetectionService>(sp =>
 {
     var basePath = Path.Combine(root, "signature-detection");
     var detrPath = Path.Combine(basePath, "conditional_detr_signature.onnx");
     var yoloPath = Path.Combine(basePath, "yolov8s.onnx");
-    return new SignatureDetectionService(detrPath, yoloPath);
+    var logger = sp.GetRequiredService<ILogger<SignatureDetectionService>>();
+    return new SignatureDetectionService(detrPath, yoloPath, logger);
 });
 
 builder.Services.AddSingleton<SignatureVerificationService>(sp =>

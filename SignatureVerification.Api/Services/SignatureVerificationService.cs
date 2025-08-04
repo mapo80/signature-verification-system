@@ -48,10 +48,24 @@ public class SignatureVerificationService : IDisposable
             if (detection)
             {
                 var cfg = config ?? new PipelineConfig();
-                var refDet = _detector.Predict(referencePath, cfg).OrderByDescending(d => d[4]).First();
+                var refDets = _detector.Predict(referencePath, cfg);
+                var candDets = _detector.Predict(candidatePath, cfg);
+
+                if (refDets.Count == 0 || candDets.Count == 0)
+                {
+                    return new VerifyResponseDto
+                    {
+                        Forged = false,
+                        Similarity = 0,
+                        ReferenceImage = null,
+                        CandidateImage = null
+                    };
+                }
+
+                var refDet = refDets.OrderByDescending(d => d[4]).First();
                 tmp1 = Crop(referencePath, refDet);
                 refImg = tmp1;
-                var candDet = _detector.Predict(candidatePath, cfg).OrderByDescending(d => d[4]).First();
+                var candDet = candDets.OrderByDescending(d => d[4]).First();
                 tmp2 = Crop(candidatePath, candDet);
                 candImg = tmp2;
             }
