@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 using SkiaSharp;
 using SignatureDetectionSdk;
@@ -13,11 +14,13 @@ public class SignatureController : ControllerBase
 {
     private readonly SignatureDetectionService _detector;
     private readonly SignatureVerificationService _verifier;
+    private readonly ILogger<SignatureController> _logger;
 
-    public SignatureController(SignatureDetectionService detector, SignatureVerificationService verifier)
+    public SignatureController(SignatureDetectionService detector, SignatureVerificationService verifier, ILogger<SignatureController> logger)
     {
         _detector = detector;
         _verifier = verifier;
+        _logger = logger;
     }
 
     [HttpPost("detect")]
@@ -33,6 +36,7 @@ public class SignatureController : ControllerBase
         try
         {
             var predictions = _detector.Predict(tempFile, request.Config);
+            _logger.LogInformation("Detected {Count} signatures", predictions.Count);
             using var image = SKBitmap.Decode(tempFile);
             var response = new DetectResponseDto
             {
@@ -68,6 +72,7 @@ public class SignatureController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during detection");
             return Problem(ex.Message);
         }
         finally
@@ -94,10 +99,12 @@ public class SignatureController : ControllerBase
         try
         {
             var result = _verifier.Verify(refFile, candFile, request.Detection, request.Temperature, request.Threshold, request.Preprocessed, request.Config);
+            _logger.LogInformation("Verification result: Forged={Forged}, Similarity={Similarity}", result.Forged, result.Similarity);
             return Ok(result);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during verification");
             return Problem(ex.Message);
         }
         finally

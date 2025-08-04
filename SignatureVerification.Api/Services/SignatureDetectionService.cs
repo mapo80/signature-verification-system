@@ -1,5 +1,5 @@
+using Microsoft.Extensions.Logging;
 using SignatureDetectionSdk;
-using SignatureVerification.Api.Exceptions;
 
 namespace SignatureVerification.Api.Services;
 
@@ -8,12 +8,14 @@ public class SignatureDetectionService
     private readonly string _detrModelPath;
     private readonly string _yoloModelPath;
     private readonly string? _datasetDir;
+    private readonly ILogger<SignatureDetectionService> _logger;
 
-    public SignatureDetectionService(string detrModelPath, string yoloModelPath, string? datasetDir = null)
+    public SignatureDetectionService(string detrModelPath, string yoloModelPath, ILogger<SignatureDetectionService> logger, string? datasetDir = null)
     {
         _detrModelPath = detrModelPath;
         _yoloModelPath = yoloModelPath;
         _datasetDir = datasetDir;
+        _logger = logger;
     }
 
     public IReadOnlyList<float[]> Predict(string imagePath, PipelineConfig? config = null)
@@ -22,8 +24,12 @@ public class SignatureDetectionService
         var dets = pipeline.Detect(imagePath);
 
         if (dets.Length == 0)
-            throw new SignatureNotFoundException();
+        {
+            _logger.LogWarning("No signatures detected in {ImagePath}", imagePath);
+            return Array.Empty<float[]>();
+        }
 
+        _logger.LogInformation("Detected {Count} signatures in {ImagePath}", dets.Length, imagePath);
         return dets;
     }
 }
