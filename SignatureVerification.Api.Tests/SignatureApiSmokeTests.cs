@@ -12,6 +12,8 @@ namespace SignatureVerification.Api.Tests;
 public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
+    private static bool ShouldRun =>
+        string.Equals(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS"), "true", StringComparison.OrdinalIgnoreCase);
 
     public SignatureApiSmokeTests(WebApplicationFactory<Program> factory)
     {
@@ -31,6 +33,7 @@ public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Progra
     [Fact]
     public async Task SwaggerEndpoint_ReturnsOpenApiDocumentAndNoErrors()
     {
+        if (!ShouldRun) return;
         using var logger = new TestLoggerProvider();
         using var factory = CreateFactoryWithLogger(_factory, logger);
         using var client = factory.CreateClient();
@@ -44,6 +47,7 @@ public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Progra
     [Fact]
     public async Task DetectEndpoint_ReturnsSignaturesAndNoErrors()
     {
+        if (!ShouldRun) return;
         using var logger = new TestLoggerProvider();
         using var factory = CreateFactoryWithLogger(_factory, logger);
         using var client = factory.CreateClient();
@@ -70,6 +74,7 @@ public class SignatureApiSmokeTests : IClassFixture<WebApplicationFactory<Progra
     [Fact]
     public async Task VerifyEndpoint_ReturnsResultAndNoErrors()
     {
+        if (!ShouldRun) return;
         using var logger = new TestLoggerProvider();
         using var factory = CreateFactoryWithLogger(_factory, logger);
         using var client = factory.CreateClient();

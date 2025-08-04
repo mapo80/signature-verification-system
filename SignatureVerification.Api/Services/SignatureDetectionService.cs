@@ -18,7 +18,7 @@ public class SignatureDetectionService
         _logger = logger;
     }
 
-    public IReadOnlyList<float[]> Predict(string imagePath, PipelineConfig? config = null)
+    public virtual IReadOnlyList<float[]> Predict(string imagePath, PipelineConfig? config = null)
     {
         using var pipeline = new DetectionPipeline(_detrModelPath, _yoloModelPath, config, _datasetDir);
         var dets = pipeline.Detect(imagePath);
