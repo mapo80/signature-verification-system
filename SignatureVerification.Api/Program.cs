@@ -3,7 +3,7 @@ using SignatureVerification.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+var root = "/app";//Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
 var soDir = Path.Combine(root, "sigver", "so");
 var ld = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH");
 Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", string.IsNullOrEmpty(ld) ? soDir : $"{soDir}:{ld}");
