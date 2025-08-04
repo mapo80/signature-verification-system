@@ -1,8 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using SignatureDetectionSdk;
 using SignatureVerification.Api.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, cfg) => cfg
+    .MinimumLevel.Verbose()
+    .WriteTo.Console());
 
 var root = "/app";//Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
 var soDir = Path.Combine(root, "sigver", "so");
